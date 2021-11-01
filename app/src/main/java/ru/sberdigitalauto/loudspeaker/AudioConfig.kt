@@ -12,6 +12,7 @@ data class AudioConfig(
     val channelsIn: Int = AudioFormat.CHANNEL_IN_MONO,
     val channelsOut: Int = AudioFormat.CHANNEL_OUT_MONO,
     val audioFormat: Int = AudioFormat.ENCODING_PCM_16BIT
-){
-    val recordingBufferSize = AudioRecord.getMinBufferSize(sampleRate, channelsIn, audioFormat)
+) {
+    val recordingBufferSize = 1024 * 2
+//AudioRecord.getMinBufferSize(sampleRate, channelsIn, audioFormat)
 }
