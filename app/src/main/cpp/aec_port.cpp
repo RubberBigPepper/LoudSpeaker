@@ -46,3 +46,26 @@ Java_ru_sberdigitalauto_loudspeaker_EchoCancelationNativeHelper_initAEC(JNIEnv *
     SpeexEchoState *echoState = speex_echo_state_init(buffer_size, filter_size);
     return (jlong )echoState;
 }
+extern "C"
+JNIEXPORT void JNICALL
+Java_ru_sberdigitalauto_loudspeaker_EchoCancelationNativeHelper_cancelEchoShort(JNIEnv *env,
+                                                                                jobject thiz,
+                                                                                jlong aec_handler,
+                                                                                jshortArray mic_input,
+                                                                                jshortArray echo_input,
+                                                                                jbyteArray echo_out) {
+    auto *echoState = (SpeexEchoState *)aec_handler;
+    jshort* inputDataPtr = env->GetShortArrayElements(mic_input, NULL);
+    jshort* echoDataPtr = env->GetShortArrayElements(echo_input, NULL);
+
+    //это место надо бы сделать более аккуратно
+    auto *pData = new jbyte[env->GetArrayLength(echo_out)];
+
+    speex_echo_cancellation(echoState, inputDataPtr, echoDataPtr, (short *)pData);
+
+    env->SetByteArrayRegion(echo_out, 0, env->GetArrayLength(echo_out), pData);
+    delete[] pData;
+
+    env->ReleaseShortArrayElements(echo_input, echoDataPtr, JNI_ABORT);
+    env->ReleaseShortArrayElements(mic_input, inputDataPtr, JNI_ABORT);
+}

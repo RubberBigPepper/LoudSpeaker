@@ -9,6 +9,7 @@ public class EchoCancelationNativeHelper {
     private native long initAEC(int bufferSize, int filterSize);
     private native void closeAEC(long aecHandler);
     private native void cancelEcho(long aecHandler, byte[] micInput, byte[] echoInput, byte[] echoOut);
+    private native void cancelEchoShort(long aecHandler, short[] micInput, short[] echoInput, byte[] echoOut);
 
     private byte[] echoOut = null;
 
@@ -19,6 +20,10 @@ public class EchoCancelationNativeHelper {
     public boolean prepareAEC(AudioConfig audioConfig) {
         int bufferSize = audioConfig.getRecordingBufferSize() / 2;//у нас 16 битные сэмплы
         int filterSize = 8192*4;// audioConfig.getSampleRate() * ECHO_TIME_MS / 1000; //размер фильтра в сэмплах
+        return prepareAEC(bufferSize, filterSize);
+    }
+
+    public boolean prepareAEC(int bufferSize, int filterSize) {
         echoOut = new byte[bufferSize * 2];
         aecNativeHandler = initAEC(bufferSize, filterSize);
         return aecNativeHandler != 0;
@@ -31,6 +36,11 @@ public class EchoCancelationNativeHelper {
 
     public byte[] makeAEC(byte[] micInput, byte[] echoInput){
         cancelEcho(aecNativeHandler, micInput, echoInput, echoOut);
+        return echoOut;
+    }
+
+    public byte[] makeAEC(short[] micInput, short[] echoInput){
+        cancelEchoShort(aecNativeHandler, micInput, echoInput, echoOut);
         return echoOut;
     }
 }
